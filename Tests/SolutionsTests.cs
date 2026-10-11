@@ -3,7 +3,7 @@ using matchingengine.TestData;
 
 namespace matchingengine.Tests;
 
-public class Tests : BaseTest
+public class SolutionsTests : BaseTest
 {
     [Test]
     public void SolutionsMenuTest()

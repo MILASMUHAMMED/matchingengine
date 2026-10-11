@@ -28,21 +28,18 @@ public class HomePage
     {
         Driver.Navigate().GoToUrl(Url);
 
-        var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
-
-        wait.Until(d =>
-            ((IJavaScriptExecutor)d).ExecuteScript(
-                "return document.readyState")?.ToString() == "complete");
-
-        var cookieButton = Driver.FindElements(CookieButtons)
-            .FirstOrDefault(button => button.Displayed);
-
-        if (cookieButton != null)
+        try
         {
-            cookieButton.Click();
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            var cookieButton = wait.Until(d =>
+                d.FindElements(CookieButtons).FirstOrDefault(button => button.Displayed));
 
-            wait.Until(d => !d.FindElements(CookieButtons)
-                .Any(button => button.Displayed));
+            cookieButton.Click();
+            wait.Until(d => !d.FindElements(CookieButtons).Any(button => button.Displayed));
+        }
+        catch (WebDriverTimeoutException)
+        {
+            // Banner didn't appear (already accepted) - nothing to do
         }
     }
 
