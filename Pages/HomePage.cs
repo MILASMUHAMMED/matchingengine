@@ -53,20 +53,20 @@ public class HomePage
             return element.Displayed && element.Enabled ? element : null;
         });
 
-        if (solutions.GetAttribute("aria-expanded") != "true")
+        if (solutions.GetDomAttribute("aria-expanded") != "true")
         {
             solutions.Click();
         }
 
         wait.Until(d =>
             d.FindElement(SolutionsToggle)
-            .GetAttribute("aria-expanded") == "true");
+            .GetDomAttribute("aria-expanded") == "true");
     }
 
     public bool IsSolutionsMenuExpanded()
     {
         return Driver.FindElement(SolutionsToggle)
-            .GetAttribute("aria-expanded") == "true";
+            .GetDomAttribute("aria-expanded") == "true";
     }
 
     public List<string> GetSolutionLinks()

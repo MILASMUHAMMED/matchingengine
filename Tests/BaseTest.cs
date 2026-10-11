@@ -11,8 +11,21 @@ public class BaseTest
     [SetUp]
     public void SetUp()
     {
-        Driver = new ChromeDriver();
-        Driver.Manage().Window.Maximize();
+        bool headless = Environment.GetEnvironmentVariable("HEADLESS") == "true";
+
+        var options = new ChromeOptions();
+        if (headless)
+        {
+            options.AddArgument("--headless=new");
+            options.AddArgument("--window-size=1920,1080");
+        }
+
+        Driver = new ChromeDriver(options);
+
+        if (!headless)
+        {
+            Driver.Manage().Window.Maximize();
+        }
     }
 
     [TearDown]
