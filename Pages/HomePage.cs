@@ -1,4 +1,5 @@
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 
 namespace matchingengine.Pages;
 
@@ -8,14 +9,15 @@ public class HomePage
 
     private const string Url = "https://www.matchingengine.com/";
 
+    private const string Path =
+        "/Music-and-copyright-solutions/Distribution-processing";
     private readonly By SolutionsToggle = By.Id("nav-toggle-solutions");
-
     private readonly By SolutionLinks = By.CssSelector(
         "header section[role='menu'] [class*='BrandNavSubMenu_children'] a");
-
     private readonly By CookieButtons = By.CssSelector(
         "#CybotCookiebotDialogBodyButtonDecline, " +
         "#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection");
+    private readonly By DistributionProcessingLink = By.LinkText("Distribution processing");
 
     public HomePage(IWebDriver driver)
     {
@@ -25,22 +27,43 @@ public class HomePage
     public void Open()
     {
         Driver.Navigate().GoToUrl(Url);
-        Thread.Sleep(2000);
 
-        var button = Driver.FindElements(CookieButtons)
-            .FirstOrDefault(b => b.Displayed);
+        var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
 
-        if (button != null)
+        wait.Until(d =>
+            ((IJavaScriptExecutor)d).ExecuteScript(
+                "return document.readyState")?.ToString() == "complete");
+
+        var cookieButton = Driver.FindElements(CookieButtons)
+            .FirstOrDefault(button => button.Displayed);
+
+        if (cookieButton != null)
         {
-            button.Click();
-            Thread.Sleep(1000);
+            cookieButton.Click();
+
+            wait.Until(d => !d.FindElements(CookieButtons)
+                .Any(button => button.Displayed));
         }
     }
 
     public void ExpandSolutionsMenu()
     {
-        Driver.FindElement(SolutionsToggle).Click();
-        Thread.Sleep(1000);
+        var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+
+        var solutions = wait.Until(d =>
+        {
+            var element = d.FindElement(SolutionsToggle);
+            return element.Displayed && element.Enabled ? element : null;
+        });
+
+        if (solutions.GetAttribute("aria-expanded") != "true")
+        {
+            solutions.Click();
+        }
+
+        wait.Until(d =>
+            d.FindElement(SolutionsToggle)
+            .GetAttribute("aria-expanded") == "true");
     }
 
     public bool IsSolutionsMenuExpanded()
@@ -60,7 +83,14 @@ public class HomePage
 
     public void OpenDistributionProcessing()
     {
-        Driver.FindElement(By.LinkText("Distribution processing")).Click();
-        Thread.Sleep(2000);
+        var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+
+        wait.Until(d =>
+        {
+            var link = d.FindElement(DistributionProcessingLink);
+            return link.Displayed && link.Enabled ? link : null;
+        }).Click();
+
+        wait.Until(d => d.Url.Contains(Path));
     }
 }
